@@ -28,6 +28,7 @@ Add ``MEDIA_FOLDER`` and ``MEDIA_URL`` in your settings, as well as various S3-r
     app.config['MEDIA_FOLDER'] = '/home/www/media'
     app.config['MEDIA_URL'] = '/media/'
     app.config['THUMBNAIL_USE_S3'] = True
+    app.config['THUMBNAIL_S3_CDN_DOMAIN'] = ''  # optional
     app.config['THUMBNAIL_S3_BUCKET_NAME'] = 'bucket-foo'
     app.config['THUMBNAIL_S3_ACCESS_KEY_ID'] = 'key-here'
     app.config['THUMBNAIL_S3_ACCESS_KEY_SECRET'] = 'secret-here'

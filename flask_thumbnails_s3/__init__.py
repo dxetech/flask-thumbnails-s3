@@ -94,15 +94,18 @@ class Thumbnail(object):
 
         scheme = self.app.config.get('THUMBNAIL_S3_USE_HTTPS') and 'https' or 'http'
         bucket_name = self.app.config.get('THUMBNAIL_S3_BUCKET_NAME')
+        cdn_domain = self.app.config.get('THUMBNAIL_S3_CDN_DOMAIN')
 
         thumb_url_full = url_for_s3(
             'static',
             bucket_name=bucket_name,
+            cdn_domain=cdn_domain,
             filename=thumb_url,
             scheme=scheme)
         original_url_full = url_for_s3(
             'static',
             bucket_name=bucket_name,
+            cdn_domain=cdn_domain,
             filename=self._get_s3_path(original_filename).replace('static/', ''),
             scheme=scheme)
 
