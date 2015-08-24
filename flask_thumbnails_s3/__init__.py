@@ -109,18 +109,13 @@ class Thumbnail(object):
             filename=self._get_s3_path(original_filename).replace('static/', ''),
             scheme=scheme)
 
+        conn = S3Connection(self.app.config.get('THUMBNAIL_S3_ACCESS_KEY_ID'), self.app.config.get('THUMBNAIL_S3_ACCESS_KEY_SECRET'))
+        bucket = conn.get_bucket(self.app.config.get('THUMBNAIL_S3_BUCKET_NAME'))
+
         # Return the thumbnail URL now if it already exists on S3.
-        # HTTP HEAD request saves us actually downloading the image
-        # for this check.
-        # Thanks to:
-        # http://stackoverflow.com/a/16778749/2066849
-        try:
-            resp = httplib2.Http().request(thumb_url_full, 'HEAD')
-            resp_status = int(resp[0]['status'])
-            assert(resp_status < 400)
+        key_exists = bucket.get_key(thumb_filename)
+        if key_exists:
             return thumb_url_full
-        except Exception:
-            pass
 
         # Thanks to:
         # http://stackoverflow.com/a/12020860/2066849
@@ -136,8 +131,7 @@ class Thumbnail(object):
         temp_file = BytesIO()
         img.save(temp_file, image.format, quality=quality)
 
-        conn = S3Connection(self.app.config.get('THUMBNAIL_S3_ACCESS_KEY_ID'), self.app.config.get('THUMBNAIL_S3_ACCESS_KEY_SECRET'))
-        bucket = conn.get_bucket(self.app.config.get('THUMBNAIL_S3_BUCKET_NAME'))
+
 
         path = self._get_s3_path(thumb_filename)
         k = bucket.new_key(path)
