@@ -88,15 +88,16 @@ class Thumbnail(object):
         return thumb_url_full
 
     def _thumbnail_s3(self, original_filename, thumb_filename,
-                      thumb_size, thumb_url, bucket_name,
+                      thumb_size, thumb_url,
                       crop=None, bg=None, quality=85):
         """Finds or creates a thumbnail for the specified image on Amazon S3."""
 
         scheme = self.app.config.get('THUMBNAIL_S3_USE_HTTPS') and 'https' or 'http'
+        bucket_name = self.app.config.get('THUMBNAIL_S3_BUCKET_NAME')
 
         thumb_url_full = url_for_s3(
             'static',
-            bucket_name=self.app.config.get('THUMBNAIL_S3_BUCKET_NAME'),
+            bucket_name=bucket_name,
             filename=thumb_url,
             scheme=scheme)
         original_url_full = url_for_s3(
@@ -146,16 +147,13 @@ class Thumbnail(object):
 
         return thumb_url_full
 
-    def thumbnail(self, img_url, size, crop=None, bg=None, quality=85,
-                  storage_type=None, bucket_name=None):
+    def thumbnail(self, img_url, size, crop=None, bg=None, quality=85):
         """
         :param img_url: url img - '/assets/media/summer.jpg'
         :param size: size return thumb - '100x100'
         :param crop: crop return thumb - 'fit' or None
         :param bg: tuple color or None - (255, 255, 255, 0)
         :param quality: JPEG quality 1-100
-        :param storage_type: either 's3' or None
-        :param bucket_name: s3 bucket name
         :return: :thumb_url:
         """
 
@@ -171,7 +169,15 @@ class Thumbnail(object):
 
         thumb_url = os.path.join(self.app.config['MEDIA_THUMBNAIL_URL'], url_path, miniature)
 
-        if not (storage_type and bucket_name):
+        if self.app.config.get('THUMBNAIL_USE_S3'):
+            return self._thumbnail_s3(original_filename,
+                                      thumb_filename,
+                                      thumb_size,
+                                      thumb_url,
+                                      crop=crop,
+                                      bg=bg,
+                                      quality=quality)
+        else:
             return self._thumbnail_local(original_filename,
                                          thumb_filename,
                                          thumb_size,
@@ -179,18 +185,6 @@ class Thumbnail(object):
                                          crop=crop,
                                          bg=bg,
                                          quality=quality)
-        else:
-            if storage_type != 's3':
-                raise ValueError('Storage type "%s" is invalid, the only supported storage type (apart from default local storage) is s3.' % storage_type)
-
-            return self._thumbnail_s3(original_filename,
-                                      thumb_filename,
-                                      thumb_size,
-                                      thumb_url,
-                                      bucket_name,
-                                      crop=crop,
-                                      bg=bg,
-                                      quality=quality)
 
     def _get_s3_path(self, filename):
         static_root_parent = self.app.config.get('THUMBNAIL_S3_STATIC_ROOT_PARENT', None)
