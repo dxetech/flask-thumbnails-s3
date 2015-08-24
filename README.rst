@@ -43,7 +43,6 @@ Use in Jinja2 template:
 
 ::
 
-    <img src="{{ 'image.jpg'|thumbnail('200x200', storage_type='s3', bucket_name='bucket-foo') }}" alt="" />
     <img src="{{ 'image.jpg'|thumbnail('200x200', crop='fit', quality=100) }}" alt="" />
 
 
