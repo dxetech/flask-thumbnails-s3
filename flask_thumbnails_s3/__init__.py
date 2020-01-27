@@ -5,7 +5,6 @@ import httplib2
 from io import BytesIO
 import os
 import re
-import urllib2 as urllib
 
 try:
     from PIL import Image, ImageOps
@@ -18,6 +17,14 @@ from boto.s3.key import Key
 
 from flask import url_for
 from url_for_s3 import url_for_s3
+
+
+try:
+    # For Python 3.0 and later
+    from urllib.request import urlopen
+except ImportError:
+    # Fall back to Python 2's urllib2
+    from urllib2 import urlopen
 
 
 class Thumbnail(object):
@@ -120,7 +127,7 @@ class Thumbnail(object):
         # Thanks to:
         # http://stackoverflow.com/a/12020860/2066849
         try:
-            fd = urllib.urlopen(original_url_full)
+            fd = urlopen(original_url_full)
             temp_file = BytesIO(fd.read())
             image = Image.open(temp_file)
         except Exception:
